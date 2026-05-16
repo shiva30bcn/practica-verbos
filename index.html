@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Práctica de Verbos Irregulares</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .app-container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .score-board {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            color: #6b7280;
+            background: #f9fafb;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+        }
+
+        #score {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .verb-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1.5rem 0 2rem;
+            color: var(--text);
+            text-transform: capitalize;
+            letter-spacing: -0.025em;
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 0.85rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            background-color: #f9fafb;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        input.correct { 
+            border-color: var(--success); 
+            background-color: #ecfdf5; 
+            color: #065f46;
+        }
+        
+        input.incorrect { 
+            border-color: var(--error); 
+            background-color: #fef2f2; 
+            color: #991b1b;
+        }
+
+        .hint-btn {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            border: none;
+            border-radius: 0.75rem;
+            width: 45px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hint-btn:hover {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .hint-btn:disabled {
+            background-color: #f3f4f6;
+            color: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        #next-btn {
+            background-color: var(--success);
+        }
+
+        #next-btn:hover {
+            background-color: #059669;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-height: 27px;
+            transition: all 0.3s ease;
+        }
+
+        .feedback.success { color: var(--success); }
+        .feedback.error { color: var(--error); }
+        .feedback.warning { color: var(--warning); font-size: 0.95rem; }
+        
+        .answer-hint {
+            display: none;
+            font-size: 0.9rem;
+            color: var(--error);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h1>Verbos Irregulares</h1>
+    <div class="score-board">Puntuación: <span id="score">0</span></div>
+
+    <div class="verb-display" id="spanish-verb">Cargando...</div>
+
+    <div class="input-group">
+        <label for="present-input">Presente (en inglés):</label>
+        <div class="input-wrapper">
+            <input type="text" id="present-input" placeholder="Ej: run" autocomplete="off">
+            <button class="hint-btn" id="hint-present" onclick="showHint('present')" title="Ver siguiente letra">?</button>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label for="past-input">Pasado simple (en inglés):</label>
+        <div class="input-wrapper">
+            <input type="text" id="past-input" placeholder="Ej: ran" autocomplete="off">
+            <button class="hint-btn" id="hint-past" onclick="showHint('past')" title="Ver siguiente letra">?</button>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedback-message"></div>
+    <div class="answer-hint" id="answer-hint"></div>
+
+    <button class="btn" id="check-btn" onclick="checkAnswers()">Comprobar</button>
+    <button class="btn" id="next-btn" onclick="nextVerb()" style="display: none;">Siguiente Verbo</button>
+</div>
+
+<script>
+    const verbs = [
+        { es: "ir", present: "go", past: "went" },
+        { es: "ver", present: "see", past: "saw" },
+        { es: "hacer", present: "make", past: "made" },
+        { es: "saber", present: "know", past: "knew" },
+        { es: "pensar", present: "think", past: "thought" },
+        { es: "tomar / coger", present: "take", past: "took" },
+        { es: "venir", present: "come", past: "came" },
+        { es: "dar", present: "give", past: "gave" },
+        { es: "decir", present: "say", past: "said" },
+        { es: "correr", present: "run", past: "ran" },
+        { es: "comer", present: "eat", past: "ate" },
+        { es: "comprar", present: "buy", past: "bought" },
+        { es: "hablar", present: "speak", past: "spoke" },
+        { es: "escribir", present: "write", past: "wrote" },
+        { es: "dormir", present: "sleep", past: "slept" },
+        { es: "leer", present: "read", past: "read" },
+        { es: "sentir", present: "feel", past: "felt" },
+        { es: "encontrar", present: "find", past: "found" },
+        { es: "beber", present: "drink", past: "drank" },
+        { es: "nadar", present: "swim", past: "swam" },
+        { es: "volar", present: "fly", past: "flew" },
+        { es: "cantar", present: "sing", past: "sang" },
+        { es: "enseñar", present: "teach", past: "taught" },
+        { es: "traer", present: "bring", past: "brought" },
+        { es: "olvidar", present: "forget", past: "forgot" }
+    ];
+
+    let currentVerb = null;
+    let score = 0;
+    let attempts = 0;
+
+    const presentInput = document.getElementById('present-input');
+    const pastInput = document.getElementById('past-input');
+    const hintPresentBtn = document.getElementById('hint-present');
+    const hintPastBtn = document.getElementById('hint-past');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const answerHint = document.getElementById('answer-hint');
+    const checkBtn = document.getElementById('check-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function getRandomVerb() {
+        return verbs[Math.floor(Math.random() * verbs.length)];
+    }
+
+    function updateScoreDisplay() {
+        document.getElementById('score').innerText = score;
+    }
+
+    function loadVerb() {
+        let newVerb = getRandomVerb();
+        while (currentVerb && newVerb.es === currentVerb.es) {
+            newVerb = getRandomVerb();
+        }
+        currentVerb = newVerb;
+        
+        document.getElementById('spanish-verb').innerText = currentVerb.es;
+
+        attempts = 0;
+        presentInput.value = '';
+        pastInput.value = '';
+        presentInput.classList.remove('correct', 'incorrect');
+        pastInput.classList.remove('correct', 'incorrect');
+        
+        presentInput.disabled = false;
+        pastInput.disabled = false;
+        hintPresentBtn.disabled = false;
+        hintPastBtn.disabled = false;
+        
+        feedbackMessage.innerText = '';
+        feedbackMessage.className = 'feedback';
+        answerHint.style.display = 'none';
+        answerHint.innerHTML = '';
+
+        checkBtn.style.display = 'block';
+        nextBtn.style.display = 'none';
+
+        presentInput.focus();
+    }
+
+    function cleanString(str) {
+        return str.trim().toLowerCase();
+    }
+
+    function showHint(type) {
+        let inputField, correctWord, hintBtn;
+
+        if (type === 'present') {
+            inputField = presentInput;
+            correctWord = currentVerb.present;
+            hintBtn = hintPresentBtn;
+        } else {
+            inputField = pastInput;
+            correctWord = currentVerb.past;
+            hintBtn = hintPastBtn;
+        }
+
+        if (!inputField.disabled) {
+            let correctLen = 0;
+            const currentValue = cleanString(inputField.value);
+            
+            // Calculamos cuántas letras correctas hay al inicio
+            for (let i = 0; i < currentValue.length; i++) {
+                if (currentValue[i] === correctWord[i]) {
+                    correctLen++;
+                } else {
+                    break;
+                }
+            }
+
+            // Añadimos una letra más de la correcta
+            if (correctLen < correctWord.length) {
+                inputField.value = correctWord.substring(0, correctLen + 1);
+                score -= 1; // Resta 1 punto por cada pulsación
+                feedbackMessage.innerText = "Pista usada: -1 punto";
+                feedbackMessage.className = 'feedback warning';
+                updateScoreDisplay();
+            }
+
+            // Si al dar la pista la palabra se completa, deshabilitar el botón
+            if (cleanString(inputField.value) === correctWord) {
+                hintBtn.disabled = true;
+            }
+
+            inputField.focus();
+        }
+    }
+
+    function checkAnswers() {
+        const userPresent = cleanString(presentInput.value);
+        const userPast = cleanString(pastInput.value);
+
+        presentInput.classList.remove('correct', 'incorrect');
+        pastInput.classList.remove('correct', 'incorrect');
+
+        const isPresentCorrect = userPresent === currentVerb.present;
+        const isPastCorrect = userPast === currentVerb.past;
+
+        if (isPresentCorrect) {
+            presentInput.classList.add('correct');
+            presentInput.disabled = true; 
+            hintPresentBtn.disabled = true;
+        } else {
+            presentInput.classList.add('incorrect');
+        }
+
+        if (isPastCorrect) {
+            pastInput.classList.add('correct');
+            pastInput.disabled = true;
+            hintPastBtn.disabled = true;
+        } else {
+            pastInput.classList.add('incorrect');
+        }
+
+        if (isPresentCorrect && isPastCorrect) {
+            feedbackMessage.innerText = '¡Excelente!';
+            feedbackMessage.className = 'feedback success';
+            
+            if (attempts === 0) score += 10;
+            else if (attempts === 1) score += 5;
+            else score += 2;
+            
+            updateScoreDisplay();
+
+            checkBtn.style.display = 'none';
+            nextBtn.style.display = 'block';
+            answerHint.style.display = 'none';
+            nextBtn.focus();
+        } else {
+            attempts++;
+            feedbackMessage.innerText = 'Casi. Revisa los campos en rojo e inténtalo de nuevo.';
+            feedbackMessage.className = 'feedback error';
+            
+            if (attempts >= 3) {
+                answerHint.style.display = 'block';
+                answerHint.innerHTML = `Solución: Presente (<b>${currentVerb.present}</b>) - Pasado (<b>${currentVerb.past}</b>)`;
+            }
+
+            if (!isPresentCorrect) presentInput.focus();
+            else pastInput.focus();
+        }
+    }
+
+    function nextVerb() {
+        loadVerb();
+    }
+
+    document.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (checkBtn.style.display !== 'none') {
+                checkAnswers();
+            } else if (nextBtn.style.display !== 'none') {
+                nextVerb();
+            }
+        }
+    });
+
+    window.onload = loadVerb;
+</script>
+
+</body>
+</html>
